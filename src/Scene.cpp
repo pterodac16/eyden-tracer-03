@@ -3,6 +3,7 @@
 #include "ShaderEyelight.h"
 #include "ShaderPhong.h"
 #include "PrimTriangle.h"
+#include "PrimSphere.h"
 
 #include <fstream>
 
@@ -11,7 +12,6 @@ void CScene::ParseOBJ(const std::string& fileName)
 	std::cout << "Parsing OBJFile : " << fileName << std::endl;
 
 	std::shared_ptr<IShader> pShader = std::make_shared<CShaderEyelight>(RGB(1, 1, 1));
-	// --- PUT YOUR CODE HERE ---
 
 	std::vector<Vec3f> vertices;
 	std::string line, v, f;
@@ -23,7 +23,10 @@ void CScene::ParseOBJ(const std::string& fileName)
 			std::istringstream iss(line);
 			Vec3f vertex;
 			iss >> v >> vertex[0] >> vertex[1] >> vertex[2];
-			std::cout << vertex << std::endl;
+			vertex[0] *= 100.0f;
+			vertex[1] *= 100.0f;
+			vertex[2] *= 100.0f;
+			//std::cout << vertex << std::endl;
 			vertices.push_back(vertex);
 		}
 		else if (line[0] == 'f') {
@@ -31,7 +34,7 @@ void CScene::ParseOBJ(const std::string& fileName)
 			int a, b, c;
 			iss >> f >> a >> b >> c;
 			a--; b--; c--;
-			std::cout << vertices[a] << " " << vertices[b] << " " << vertices[c] << std::endl;
+			//std::cout << vertices[a] << " " << vertices[b] << " " << vertices[c] << std::endl;
 			Add(std::make_shared<CPrimTriangle>(vertices[a], vertices[b], vertices[c], pShader));
 		}
 	}

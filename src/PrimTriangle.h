@@ -68,7 +68,9 @@ public:
 	virtual CBoundingBox calcBounds(void) const override
 	{
 		CBoundingBox res;
-		// --- PUT YOUR CODE HERE ---
+		res.extend(m_a);
+		res.extend(m_b);
+		res.extend(m_c);
 		return res;
 	}
 	

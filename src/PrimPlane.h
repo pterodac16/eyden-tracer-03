@@ -36,7 +36,10 @@ public:
 	virtual CBoundingBox calcBounds(void) const override
 	{
 		CBoundingBox bounds;
-		// --- PUT YOUR CODE HERE ---
+		Vec3f posInf(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+		Vec3f negInf(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity());
+		bounds.extend(posInf);
+		bounds.extend(negInf);
 		return bounds;
 	}
 	

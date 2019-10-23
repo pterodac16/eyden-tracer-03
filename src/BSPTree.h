@@ -36,11 +36,32 @@ public:
 	 */
 	std::shared_ptr<CBSPNode> BuildTree(const CBoundingBox& box, const std::vector<std::shared_ptr<CPrim>>& vpPrims, int depth)
 	{
-		float splitVal;
-		int splitDim;
-		std::shared_ptr<CBSPNode> pLeft;
-		std::shared_ptr<CBSPNode> pRight;
-		// --- PUT YOUR CODE HERE ---
+		if (depth > m_maxDepth || vpPrims.size() < m_minTri) {
+			std::shared_ptr<CBSPNode> leafNode = std::make_shared<CBSPNode>(vpPrims);
+			return leafNode;
+		}
+		
+		Vec3f voxelDimensions(box.m_max[0] - box.m_min[0], box.m_max[1] - box.m_min[1], box.m_max[2] - box.m_min[2]);
+		int splitDim = MaxDim(voxelDimensions);
+		float splitVal = (box.m_max[splitDim] + box.m_min[splitDim]) / 2;
+		CBoundingBox leftVox(box);
+		CBoundingBox rightVox (box);
+		leftVox.m_max[splitDim] = splitVal;
+		rightVox.m_min[splitDim] = splitVal;
+		std::vector<std::shared_ptr<CPrim>> leftPrims;
+		std::vector<std::shared_ptr<CPrim>> rightPrims;
+
+		for (auto prim : vpPrims) {
+			if (prim->inVoxel(leftVox)) {
+				leftPrims.push_back(prim);
+			}
+			else {
+				rightPrims.push_back(prim);
+			}
+		}
+		std::shared_ptr<CBSPNode> pLeft = BuildTree(leftVox, leftPrims, depth + 1);
+		std::shared_ptr<CBSPNode> pRight = BuildTree(rightVox, rightPrims, depth + 1);
+
 		return std::make_shared<CBSPNode>(splitVal, splitDim, pLeft, pRight);
 	}
 
@@ -51,8 +72,14 @@ public:
 	 */
 	bool Intersect(Ray& ray)
 	{
-		// --- PUT YOUR CODE HERE ---
-		return false;
+		float t0 = 0;
+		float t1 = 0;
+		m_bounds.clip(ray, t0, t1);
+		if (t0 == 0 && t1 == 0)
+			return false;
+		else {
+			return m_root->traverse(ray, t0, t1);
+		}
 	}
 
 	

@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "ILight.h"
 #include "Prim.h"
 #include "CameraPerspective.h"
@@ -89,7 +90,10 @@ public:
 	CBoundingBox CalcBounds(void)
 	{
 		CBoundingBox res;
-		// --- PUT YOUR CODE HERE ---
+		for (auto pPrim : m_vpPrims) {
+			CBoundingBox primBox = pPrim->calcBounds();
+			res.extend(primBox);
+		}
 		return res;
 	}
 	/**

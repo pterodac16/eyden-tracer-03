@@ -2,7 +2,8 @@
 
 #include "types.h"
 
-struct Ray;
+#include <limits>
+#include "ray.h"
 
 namespace {
 	inline Vec3f Min3f(const Vec3f a, const Vec3f b)
@@ -22,7 +23,15 @@ namespace {
 class CBoundingBox
 {
 public:
-	CBoundingBox(void) = default;
+	CBoundingBox(void) {
+		clear();
+	}
+
+	CBoundingBox(const CBoundingBox &box) {
+		m_min = box.m_min;
+		m_max = box.m_max;
+	}
+
 	~CBoundingBox(void)= default;
 	
 	/**
@@ -30,8 +39,14 @@ public:
 	 * @details This function resets the member variables \b m_min and \b m_max
 	 */
 	void clear(void)
-	{
-		// --- PUT YOUR CODE HERE ---
+	{	
+		m_min[0] = std::numeric_limits<float>::infinity();
+		m_min[1] = std::numeric_limits<float>::infinity();
+		m_min[2] = std::numeric_limits<float>::infinity();
+
+		m_max[0] = -std::numeric_limits<float>::infinity();
+		m_max[1] = -std::numeric_limits<float>::infinity();
+		m_max[2] = -std::numeric_limits<float>::infinity();
 	}
 	
 	/**
@@ -40,7 +55,8 @@ public:
 	 */
 	void extend(Vec3f a)
 	{
-		// --- PUT YOUR CODE HERE ---
+		m_min = Min3f(m_min, a);
+		m_max = Max3f(m_max, a);
 	}
 	
 	/**
@@ -49,7 +65,8 @@ public:
 	 */
 	void extend(const CBoundingBox& box)
 	{
-		// --- PUT YOUR CODE HERE ---
+		extend(box.m_max);
+		extend(box.m_min);
 	}
 	
 	/**
@@ -58,8 +75,10 @@ public:
 	 */
 	bool overlaps(const CBoundingBox& box)
 	{
-		// --- PUT YOUR CODE HERE ---
-		return true;
+		bool overlapX = m_min[0] <= box.m_max[0] && box.m_min[0] <= m_max[0];
+		bool overlapY = m_min[1] <= box.m_max[1] && box.m_min[1] <= m_max[1];
+		bool overlapZ = m_min[2] <= box.m_max[2] && box.m_min[2] <= m_max[2];
+		return overlapX && overlapY && overlapZ;
 	}
 	
 	/**
@@ -70,7 +89,33 @@ public:
 	 */
 	void clip(const Ray& ray, float& t0, float& t1)
 	{
-		// --- PUT YOUR CODE HERE ---
+			float txNear = (m_min[0] - ray.org[0]) / ray.dir[0];
+			float tyNear = (m_min[1] - ray.org[1]) / ray.dir[1];
+			float tzNear = (m_min[2] - ray.org[2]) / ray.dir[2];
+
+			float txFar = (m_max[0] - ray.org[0]) / ray.dir[0];
+			float tyFar = (m_max[1] - ray.org[1]) / ray.dir[1];
+			float tzFar = (m_max[2] - ray.org[2]) / ray.dir[2];
+
+			if (ray.dir[0] < 0) {
+				std::swap(txNear, txFar);
+			}
+
+			if (ray.dir[1] < 0) {
+				std::swap(tyNear, tyFar);
+			}
+
+			if (ray.dir[2] < 0) {
+				std::swap(tzNear, tzFar);
+			}
+
+			float maxTNear = MAX(MAX(txNear, tyNear), tzNear);
+			float minTFar = MIN(MIN(txFar, tyFar), tzFar);
+
+			if (maxTNear < minTFar) {
+				t0 = maxTNear;
+				t1 = minTFar;
+			}
 	}
 	
 	
